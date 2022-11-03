@@ -15,6 +15,7 @@ const normalize = (tensor) => {
   };
 };
 
+// Look into these being undefined for predictions
 const denormalize = (tensor, min, max) => {
   const denormalizedTensor = tensor.mul(max.sub(min)).add(min);
   return denormalizedTensor;
@@ -39,6 +40,9 @@ const prepareData = (data, timeWindowSize) => {
 const DataProvider = ({ children }) => {
   const timestepSize = 7;
   const [points, setPoints] = useState();
+
+  const [testingPoints, setTestingPoints] = useState();
+
   const [normalizedFeatures, setNormalizedFeatures] = useState();
   const [normalizedLabels, setNormalizedLabels] = useState();
   const [testingFeatures, setTestingFeatures] = useState();
@@ -76,6 +80,7 @@ const DataProvider = ({ children }) => {
 
           let trainingData = points.slice(0, points.length / 2);
           let testingData = points.slice(points.length / 2 + 1, points.length);
+          setTestingPoints(testingData);
 
           // I want to break the data up into sequences of 7 days
           // the number of sequences will be the dataset/7
@@ -116,13 +121,13 @@ const DataProvider = ({ children }) => {
             tensor: normTestingFeaturesTensor,
             min: fMinTesting,
             max: fMaxTesting,
-          } = normalize(trainingFeatureTensor);
+          } = normalize(testingFeatureTensor);
 
           const {
             tensor: normTestingLabelsTensor,
             min: lMinTesting,
             max: lMaxTesting,
-          } = normalize(trainingLabelTensor);
+          } = normalize(testingLabelTensor);
 
           setPoints(points);
           setTrainingFeatures(normTrainingFeaturesTensor);
@@ -159,7 +164,12 @@ const DataProvider = ({ children }) => {
         trainingFeaturesMax,
         trainingLabelsMin,
         trainingLabelsMax,
+        testingFeaturesMin,
+        testingFeaturesMax,
+        testingLabelsMin,
+        testingLabelsMax,
         timestepSize,
+        testingPoints,
         denormalize,
         predictions,
         setPredictions,

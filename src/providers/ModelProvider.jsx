@@ -79,10 +79,15 @@ const ModelProvider = ({ children }) => {
   };
 
   const predict = (predictionSet) => {
-    if (model)
+    if (model && predictionSet) {
       return denormalize(
-        model.predict(predictionSet, trainingLabelsMin, trainingLabelsMax)
-      );
+        model.predict(predictionSet),
+        testingLabelsMin,
+        testingLabelsMax
+      )
+        .flatten()
+        .array();
+    }
   };
 
   return (

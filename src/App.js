@@ -5,8 +5,8 @@ import { useData } from "./providers/DataProvider";
 import { useModel } from "./providers/ModelProvider";
 
 function App() {
-  const { points, testingFeatures } = useData();
-  const { trainModel, predict, setPredictions } = useModel();
+  const { points, testingFeatures, setPredictions } = useData();
+  const { trainModel, predict } = useModel();
 
   return (
     <Stack
@@ -24,8 +24,7 @@ function App() {
           <Button onClick={() => trainModel()}>Train model</Button>
           <Button
             onClick={() => {
-              const predictions = predict(testingFeatures);
-              console.log(predictions);
+              let predictions = predict(testingFeatures);
               setPredictions(predictions);
             }}
           >
