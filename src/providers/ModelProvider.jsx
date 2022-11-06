@@ -56,7 +56,7 @@ const ModelProvider = ({ children }) => {
         model
           .fit(trainingFeatures, trainingLabels, {
             batchSize: 32,
-            epochs: 25,
+            epochs: 12,
             validationSplit: 0.1,
             callbacks: [
               new tf.CustomCallback({
