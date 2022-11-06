@@ -19,7 +19,6 @@ const ChartPrediction = () => {
 
           let lastPt = points[points.length - 1];
           let predictionData = [lastPt];
-          console.log(lastPt);
 
           let predictionDate = new Date(lastPt.x);
           lastPredictions.forEach((pred) => {
