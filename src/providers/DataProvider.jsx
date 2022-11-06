@@ -37,8 +37,34 @@ const prepareData = (data, timeWindowSize) => {
   };
 };
 
+const prepareDataMulti = (data, timeWindowSize, futureTimeWindowSize) => {
+  const features = [];
+  const labels = [];
+
+  if (data.length >= timeWindowSize + futureTimeWindowSize + 1) {
+    for (
+      let i = timeWindowSize;
+      i < data.length - futureTimeWindowSize - 1;
+      i++
+    ) {
+      let sequence = data.slice(i - timeWindowSize, i).map(({ y }) => [y]);
+      let futureSequence = data
+        .slice(i + 1, i + futureTimeWindowSize + 1)
+        .map(({ y }) => y);
+      features.push(sequence);
+      labels.push(futureSequence);
+    }
+  }
+
+  return {
+    features: tf.tensor3d(features, [features.length, timeWindowSize, 1]),
+    labels: tf.tensor2d(labels, [labels.length, futureTimeWindowSize]),
+  };
+};
+
 const DataProvider = ({ children }) => {
-  const timestepSize = 7;
+  const timestepSize = 30;
+  const futureStepSize = 7;
   const [points, setPoints] = useState();
 
   const [testingPoints, setTestingPoints] = useState();
@@ -70,7 +96,7 @@ const DataProvider = ({ children }) => {
     tf.tidy(() => {
       csv
         .filter((record) => {
-          return record.Name === "GOOGL";
+          return record.Name === "AAL";
         })
         .map((record) => ({ x: record.date, y: record.close }))
         .toArray()
@@ -100,9 +126,9 @@ const DataProvider = ({ children }) => {
           }
 
           let { features: trainingFeatureTensor, labels: trainingLabelTensor } =
-            prepareData(trainingData, timestepSize);
+            prepareDataMulti(trainingData, timestepSize, futureStepSize);
           let { features: testingFeatureTensor, labels: testingLabelTensor } =
-            prepareData(testingData, timestepSize);
+            prepareDataMulti(testingData, timestepSize, futureStepSize);
 
           // normalize data to be in between 0 and 1
           const {
@@ -169,6 +195,7 @@ const DataProvider = ({ children }) => {
         testingLabelsMin,
         testingLabelsMax,
         timestepSize,
+        futureStepSize,
         testingPoints,
         denormalize,
         predictions,

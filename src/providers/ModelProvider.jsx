@@ -21,22 +21,32 @@ const ModelProvider = ({ children }) => {
     testingLabelsMin,
     testingLabelsMax,
     timestepSize,
+    futureStepSize,
     denormalize,
   } = useData();
 
   const trainModel = () => {
     if (trainingFeatures && trainingLabels)
       tf.tidy(() => {
-        console.log("Model creation begun");
         const model = tf.sequential();
+
         model.add(
           tf.layers.lstm({
-            units: 32,
+            units: timestepSize,
             inputShape: [timestepSize, 1],
+            returnSequences: true,
             useBias: true,
           })
         );
-        model.add(tf.layers.dense({ units: 1 }));
+
+        model.add(
+          tf.layers.lstm({
+            units: Math.ceil(timestepSize / 2),
+            activation: "relu",
+          })
+        );
+
+        model.add(tf.layers.dense({ units: futureStepSize }));
 
         model.compile({
           loss: "meanSquaredError",
@@ -45,7 +55,7 @@ const ModelProvider = ({ children }) => {
 
         model
           .fit(trainingFeatures, trainingLabels, {
-            batchSize: 64,
+            batchSize: 32,
             epochs: 25,
             validationSplit: 0.1,
             callbacks: [
@@ -69,7 +79,7 @@ const ModelProvider = ({ children }) => {
                   console.log("training done");
                 },
               }),
-              tf.callbacks.earlyStopping({ monitor: "loss" }),
+              //tf.callbacks.earlyStopping({ monitor: "loss" }),
             ],
           })
           .then(() => {
