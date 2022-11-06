@@ -4,14 +4,14 @@ import { useData } from "../providers/DataProvider";
 import LineChart from "./LineChart";
 
 const ChartPrediction = () => {
-  const { points, predictions, testingPoints } = useData();
+  const { points, predictions, testingPoints, timestepSize } = useData();
   const [testData, setTestData] = useState([]);
 
   useEffect(() => {
     if (predictions)
       predictions.then((predictions) => {
         if (predictions && testingPoints) {
-          let startTestI = points.length - testingPoints.length;
+          let startTestI = points.length - testingPoints.length + timestepSize;
           let count = 0;
           let predictionData = points.map((val, i) => {
             let newVal = { ...val };
